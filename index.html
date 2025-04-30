@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tim Kami</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .team-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 800px;
+        }
+
+        .card {
+            width: 250px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.5s ease-in-out, box-shadow 0.3s ease-in-out;
+            opacity: 0;
+            animation: fadeInCard 1s ease-in-out forwards;
+        }
+
+        @keyframes fadeInCard {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:hover {
+            transform: scale(2.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .role {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <li class="nav-item">
+        <a href="#" class="nav-link" onclick="toggleNotifikasi()" id="notifButton">
+            <img id="notifIcon" src="" alt="Notifikasi" style="width: 24px; height: 24px;">
+        </a>
+    </li>
+    
+    <script>
+        const jamNotifikasi = [8, 14, 17];
+        const notifSound = document.getElementById('notifSound');
+        const notifIcon = document.getElementById('notifIcon');
+        const notifButton = document.getElementById('notifButton');
+        
+        // Update icon saat halaman dibuka
+        document.addEventListener("DOMContentLoaded", () => {
+            updateIcon();
+        });
+        
+        // Toggle notifikasi lokal
+        function toggleNotifikasi() {
+            const isAktif = localStorage.getItem('notifikasiAktif') === 'true';
+        
+            if (isAktif) {
+                if (confirm("Matikan notifikasi otomatis?")) {
+                    localStorage.setItem('notifikasiAktif', 'false');
+                    tampilAlert("Notifikasi dimatikan.");
+                    updateIcon();
+                }
+            } else {
+                mintaIzinNotifikasi();
+            }
+        }
+        
+        // Minta izin Web Notification
+        function mintaIzinNotifikasi() {
+            if (Notification.permission === "granted") {
+                localStorage.setItem('notifikasiAktif', 'true');
+                tampilAlert("Notifikasi diaktifkan.");
+                updateIcon();
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        localStorage.setItem('notifikasiAktif', 'true');
+                        tampilAlert("Notifikasi berhasil diaktifkan.");
+                        updateIcon();
+                    } else {
+                        tampilAlert("Izin notifikasi tidak diberikan.");
+                    }
+                });
+            } else {
+                tampilAlert("Notifikasi diblokir oleh browser.");
+            }
+        }
+        
+        // Tampilkan icon aktif/nonaktif
+        function updateIcon() {
+            const aktif = localStorage.getItem('notifikasiAktif') === 'true';
+            notifIcon.src = aktif
+                ? ""
+                : "";
+        }
+        
+        // Tampilkan alert manis
+        function tampilAlert(pesan) {
+            const div = document.createElement('div');
+            div.className = 'custom-alert';
+            div.textContent = pesan;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+        
+        // Jalankan notifikasi jam tertentu
+        setInterval(() => {
+            const sekarang = new Date();
+            const jam = sekarang.getHours();
+            const menit = sekarang.getMinutes();
+            const aktif = localStorage.getItem('notifikasiAktif') === 'true';
+        
+            if (aktif && Notification.permission === "granted" && jamNotifikasi.includes(jam) && menit === 0) {
+                new Notification("Pengingat Absensi", {
+                    body: `Sudah pukul ${jam.toString().padStart(2, '0')}:00. Jangan lupa absensi ya!`,
+                    icon: ""
+                });
+                notifSound.play();
+        
+                // Kirim push juga via OneSignal
+                if (window.OneSignal) {
+                    OneSignal.sendSelfNotification(
+                        "Pengingat Absensi",
+                        `Sudah pukul ${jam.toString().padStart(2, '0')}:00. Saatnya absensi.`,
+                        null, // URL ketika diklik
+                        ""
+                    );
+                }
+            }
+        }, 60000);
+        </script>
+         
+        <!-- Tambahkan di <head> halaman Blade kamu -->
+        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+        <script>
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+              appId: "1274caea-641e-4d0a-ba99-7c9bd95492b5",
+              safari_web_id: "web.onesignal.auto.67f7c7cd-fb70-49d1-aa8c-90d60d7056be",
+              notifyButton: {
+                enable: true,
+              },
+            });
+          });
+        </script>
+            
+</body>
+</html>
