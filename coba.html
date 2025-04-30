@@ -77,7 +77,7 @@
 <body>
     <li class="nav-item">
         <a href="#" class="nav-link" onclick="toggleNotifikasi()" id="notifButton">
-            <img id="notifIcon" src="{{ asset('images/notifikasi1.png') }}" alt="Notifikasi" style="width: 24px; height: 24px;">
+            <img id="notifIcon" src="" alt="Notifikasi" style="width: 24px; height: 24px;">
         </a>
     </li>
     
@@ -132,8 +132,8 @@
         function updateIcon() {
             const aktif = localStorage.getItem('notifikasiAktif') === 'true';
             notifIcon.src = aktif
-                ? "{{ asset('images/notifikasi2.png') }}"
-                : "{{ asset('images/notifikasi1.png') }}";
+                ? ""
+                : "";
         }
         
         // Tampilkan alert manis
@@ -155,7 +155,7 @@
             if (aktif && Notification.permission === "granted" && jamNotifikasi.includes(jam) && menit === 0) {
                 new Notification("Pengingat Absensi", {
                     body: `Sudah pukul ${jam.toString().padStart(2, '0')}:00. Jangan lupa absensi ya!`,
-                    icon: "{{ asset('images/notifikasi2.png') }}"
+                    icon: ""
                 });
                 notifSound.play();
         
@@ -165,7 +165,7 @@
                         "Pengingat Absensi",
                         `Sudah pukul ${jam.toString().padStart(2, '0')}:00. Saatnya absensi.`,
                         null, // URL ketika diklik
-                        "{{ asset('images/notifikasi2.png') }}"
+                        ""
                     );
                 }
             }
